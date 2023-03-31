@@ -8,6 +8,7 @@
 #endif
 //-----------------------------------------------------------
 #include <Firebase_ESP_Client.h>
+#include <WiFi.h>
 //Librerias que Utilizara el proyecto
 
 //RTDB, Libreria de Ayuda o Apoyo.
@@ -51,7 +52,29 @@ WiFiMulti multi;
 #endif
 
 void startup(){
-  Serial.begin(115200);
+
+}
+
+void detectYourself(){
+
+  String nameOfEsp = String(Firebase.RTDB.get(&fbdo, PATH_ESP));
+  String s = fbdo.to<String>();
+
+  Serial.println(s);
+  if(s == ESP_NAME){
+      Serial.println("ESP Local Information");
+      Serial.println("IP: " + String(IP_ESP));
+      Serial.println("PATH IN DATABASE " + String(PATH_ESP));
+      Serial.println("ESP NAME: " + String(ESP_NAME));
+      IsESPCreated = true;
+    }else{
+      Serial.print("The ESP are not vinculated with the database.");
+      IsESPCreated = false;
+    }
+}
+
+void setup(){
+   Serial.begin(115200);
 
 #if defined(ARDUINO_RASPBERRY_PI_PICO_W)
   multi.addAP(WIFI_SSID, WIFI_PASSWORD);
@@ -77,7 +100,7 @@ void startup(){
   Serial.println(WiFi.localIP());
   Serial.println();
 
-  Serial.printf("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
+  Serial.print("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
 
   /* Assign the database URL(required) */
   config.database_url = DATABASE_URL;
@@ -95,28 +118,7 @@ void startup(){
   pinMode(BIT_1, OUTPUT);
   pinMode(BIT_2, OUTPUT);
   pinMode(BIT_3, OUTPUT);
-}
 
-void detectYourself(){
-
-  String nameOfEsp = String(Firebase.RTDB.get(&fbdo, PATH_ESP));
-  String s = fbdo.to<String>();
-
-  Serial.println(s);
-  if(s == ESP_NAME){
-      Serial.println("ESP Local Information");
-      Serial.println("IP: " + String(IP_ESP));
-      Serial.println("PATH IN DATABASE " + String(PATH_ESP));
-      Serial.println("ESP NAME: " + String(ESP_NAME));
-      IsESPCreated = true;
-    }else{
-      Serial.print("The ESP are not vinculated with the database.");
-      IsESPCreated = false;
-    }
-}
-
-void setup(){
-  startup();
   detectYourself();
 }
 
