@@ -50,7 +50,7 @@ int count = 0;
 WiFiMulti multi;
 #endif
 
-void init(){
+void startup(){
   Serial.begin(115200);
 
 #if defined(ARDUINO_RASPBERRY_PI_PICO_W)
@@ -116,7 +116,7 @@ void detectYourself(){
 }
 
 void setup(){
-  init();
+  startup();
   detectYourself();
 }
 
