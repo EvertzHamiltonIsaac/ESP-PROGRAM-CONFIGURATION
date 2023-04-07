@@ -8,7 +8,6 @@
 #endif
 //-----------------------------------------------------------
 #include <Firebase_ESP_Client.h>
-#include <WiFi.h>
 //Librerias que Utilizara el proyecto
 
 //RTDB, Libreria de Ayuda o Apoyo.
@@ -51,30 +50,8 @@ int count = 0;
 WiFiMulti multi;
 #endif
 
-void startup(){
-
-}
-
-void detectYourself(){
-
-  String nameOfEsp = String(Firebase.RTDB.get(&fbdo, PATH_ESP));
-  String s = fbdo.to<String>();
-
-  Serial.println(s);
-  if(s == ESP_NAME){
-      Serial.println("ESP Local Information");
-      Serial.println("IP: " + String(IP_ESP));
-      Serial.println("PATH IN DATABASE " + String(PATH_ESP));
-      Serial.println("ESP NAME: " + String(ESP_NAME));
-      IsESPCreated = true;
-    }else{
-      Serial.print("The ESP are not vinculated with the database.");
-      IsESPCreated = false;
-    }
-}
-
-void setup(){
-   Serial.begin(115200);
+void STARTUP(){
+  Serial.begin(115200);
 
 #if defined(ARDUINO_RASPBERRY_PI_PICO_W)
   multi.addAP(WIFI_SSID, WIFI_PASSWORD);
@@ -100,7 +77,7 @@ void setup(){
   Serial.println(WiFi.localIP());
   Serial.println();
 
-  Serial.print("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
+  Serial.printf("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
 
   /* Assign the database URL(required) */
   config.database_url = DATABASE_URL;
@@ -118,75 +95,159 @@ void setup(){
   pinMode(BIT_1, OUTPUT);
   pinMode(BIT_2, OUTPUT);
   pinMode(BIT_3, OUTPUT);
+}
 
+void detectYourself(){
+
+  String nameOfEsp = String(Firebase.RTDB.get(&fbdo, PATH_ESP));
+  String s = fbdo.to<String>();
+
+  Serial.println(s);
+  if(s == ESP_NAME){
+      Serial.println("ESP Local Information");
+      Serial.println("IP: " + String(IP_ESP));
+      Serial.println("PATH IN DATABASE " + String(PATH_ESP));
+      Serial.println("ESP NAME: " + String(ESP_NAME));
+      IsESPCreated = true;
+    }else{
+      Serial.print("The ESP are not vinculated with the database.");
+      IsESPCreated = false;
+    }
+}
+
+void setup(){
+  STARTUP();
   detectYourself();
 }
+
+
+String binary = "";
 
 void loop()
 {
   if(IsESPCreated == true){
 /*-------------------------------------B0-------------------------------------*/
-    if (millis() - dataMillis > 1000){
+    if (millis() - dataMillis > 500){
       dataMillis = millis();
-      if (Firebase.RTDB.getBool(&fbdo, "1111:DB1:1111::/B0")) {
-        if (fbdo.dataTypeEnum() == fb_esp_rtdb_data_type_boolean) {
 
-          digitalWrite(BIT_0,0);
-          digitalWrite(BIT_1,0);
-
-          Serial.println("B0: " + fbdo.to<bool>());
-      }
-    } else {
-        Serial.println(fbdo.errorReason());
-      }
-    }
-/*-------------------------------------B1-------------------------------------*/
-    if (millis() - dataMillis > 1000){
-      dataMillis = millis();
-      if (Firebase.RTDB.getBool(&fbdo, "1111:DB1:1111::/B1")) {
-        if (fbdo.dataTypeEnum() == fb_esp_rtdb_data_type_boolean) {
-
-          digitalWrite(BIT_0,0);
-          digitalWrite(BIT_1,1);
-
-          Serial.println("B0: " + fbdo.to<bool>());
-      }
-    } else {
-        Serial.println(fbdo.errorReason());
-      }
-    }
-/*-------------------------------------B2-------------------------------------*/
-    if (millis() - dataMillis > 1000){
-      dataMillis = millis();
-      if (Firebase.RTDB.getBool(&fbdo, "1111:DB1:1111::/B2")) {
-        if (fbdo.dataTypeEnum() == fb_esp_rtdb_data_type_boolean) {
-
-          digitalWrite(BIT_0,1);
-          digitalWrite(BIT_1,0);
-
-          Serial.println("B0: " + fbdo.to<bool>());
-      }
-    } else {
-        Serial.println(fbdo.errorReason());
-      }
-    }
-/*-------------------------------------B3-------------------------------------*/
-    if (millis() - dataMillis > 1000){
-      dataMillis = millis();
-      if (Firebase.RTDB.getBool(&fbdo, "1111:DB1:1111::/B3")) {
-        if (fbdo.dataTypeEnum() == fb_esp_rtdb_data_type_boolean) {
-
-          digitalWrite(BIT_0,1);
-          digitalWrite(BIT_1,1);
-
-          Serial.println("B0: " + fbdo.to<bool>());
-      }
-    } else {
-        Serial.println(fbdo.errorReason());
-      }
+	    for(int i = 0; i <= 3; i++){
+		    if (Firebase.RTDB.getBool(&fbdo, "1111:DB1:1111::/B" + String(i))) {
+          if (fbdo.dataTypeEnum() == fb_esp_rtdb_data_type_boolean) {
+            if(fbdo.to<bool>() == true){
+              //Serial.println("B0: " + String(i));
+              binary += "1";
+              delay(250);
+            }
+            else {
+              binary += "0";
+              //Serial.println("B0: " + String(i));
+              delay(250);
+            }
+		      }
+        } else {
+          Serial.println(fbdo.errorReason());
+        }
+	    }
+	      Serial.println("Output: " + binary); 
     }
 
-    } else {
-      Serial.print("The ESP are not vinculated with the database.");
+    if(binary == "0000"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,0);
       }
+    if(binary == "0001"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,1);
+      }
+    if(binary == "0010"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,0);
+      } 
+    if(binary == "0011"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,1);
+      }
+    if(binary == "0100"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,1);
+      }
+    if(binary == "0101"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,1);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,1);
+      }
+    if(binary == "0110"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,1);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,0);
+      }
+    if(binary == "0111"){
+        digitalWrite(BIT_0,0);
+        digitalWrite(BIT_1,1);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,1);
+      }
+    else if(binary == "1000"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,0);
+      }
+    if(binary == "1001"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,1);
+      }
+    if(binary == "1010"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,0);
+      }
+    if(binary == "1011"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,1);
+      }
+    if(binary == "1100"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,1);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,0);
+      }
+    if(binary == "1101"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,1);
+        digitalWrite(BIT_2,0);
+        digitalWrite(BIT_3,1);
+      } 
+    if(binary == "1110"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,1);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,0);
+      }
+    if(binary == "1111"){
+        digitalWrite(BIT_0,1);
+        digitalWrite(BIT_1,1);
+        digitalWrite(BIT_2,1);
+        digitalWrite(BIT_3,1);
+      }
+      binary = "";
+    }
+  else { Serial.print("The ESP are not vinculated with the database."); }
 }
