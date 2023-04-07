@@ -127,7 +127,7 @@ void loop()
 {
   if(IsESPCreated == true){
 /*-------------------------------------B0-------------------------------------*/
-    if (millis() - dataMillis > 500){
+    if (millis() - dataMillis > 200){
       dataMillis = millis();
 
 	    for(int i = 0; i <= 3; i++){
@@ -136,12 +136,12 @@ void loop()
             if(fbdo.to<bool>() == true){
               //Serial.println("B0: " + String(i));
               binary += "1";
-              delay(250);
+              delay(150);
             }
             else {
               binary += "0";
               //Serial.println("B0: " + String(i));
-              delay(250);
+              delay(150);
             }
 		      }
         } else {
@@ -177,9 +177,9 @@ void loop()
       }
     if(binary == "0100"){
         digitalWrite(BIT_0,0);
-        digitalWrite(BIT_1,0);
+        digitalWrite(BIT_1,1);
         digitalWrite(BIT_2,0);
-        digitalWrite(BIT_3,1);
+        digitalWrite(BIT_3,0);
       }
     if(binary == "0101"){
         digitalWrite(BIT_0,0);
